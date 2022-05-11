@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -12,9 +13,14 @@
     "url": "git+https://github.com/ville24/FullStackOpen2022T4.git"
   },
   "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ville24/FullStackOpen2022T4/issues"
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.10.15",
+    "mongoose-unique-validator": "^2.0.3"
   },
-  "homepage": "https://github.com/ville24/FullStackOpen2022T4#readme"
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
 }

@@ -1,6 +1,6 @@
 const listHelper = require('../utils/list_helper')
 
-describe('total likes', () => {
+describe('most likes', () => {
   const listWithOneBlog = [
     {
       _id: '5a422aa71b54a676234d17f8',
@@ -12,7 +12,7 @@ describe('total likes', () => {
     }
   ]
 
-  const blogs = [
+ blogs = [
     {
       _id: "5a422a851b54a676234d17f7",
       title: "React patterns",
@@ -61,21 +61,31 @@ describe('total likes', () => {
       likes: 2,
       __v: 0
     }  
-  ]
+  ] 
 
-  test('when list has only one blog equals the likes of that', () => {
-    const result = listHelper.totalLikes(listWithOneBlog)
-    expect(result).toBe(5)
+ test('when list has only one blog returns the author of that and number of likes', () => {
+    const result = listHelper.mostLikes(listWithOneBlog)
+    const resultObject = 
+      {
+        author: "Edsger W. Dijkstra",
+        likes: 5
+      }
+    expect(result).toEqual(resultObject)
   })
 
-  test('when list has many blogs equals the likes are calculated', () => {
-    const result = listHelper.totalLikes(blogs)
-    expect(result).toBe(36)
+ test('when list has many blogs returns the most favourite author by number of likes', () => {
+    const result = listHelper.mostLikes(blogs)
+    const resultObject = 
+      {
+        author: "Edsger W. Dijkstra",
+        likes: 17
+      }
+    expect(result).toEqual(resultObject)
   })
 
-  test('when list is empty likes are zero', () => {
-    const result = listHelper.totalLikes([])
-    expect(result).toBe(0)
+  test('when list is empty return empty object', () => {
+    const result = listHelper.mostLikes([])
+    expect(result).toEqual({})
   })
 })
 

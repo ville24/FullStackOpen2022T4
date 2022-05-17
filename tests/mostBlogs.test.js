@@ -1,6 +1,6 @@
 const listHelper = require('../utils/list_helper')
 
-describe('favourite blog', () => {
+describe('most blogs', () => {
   const listWithOneBlog = [
     {
       _id: '5a422aa71b54a676234d17f8',
@@ -63,37 +63,28 @@ describe('favourite blog', () => {
     }  
   ] 
 
-
- test('when list has only one blog returns that', () => {
-    const result = listHelper.favouriteBlog(listWithOneBlog)
-    const resultBlog = 
+ test('when list has only one blog returns the author of that', () => {
+    const result = listHelper.mostBlogs(listWithOneBlog)
+    const resultObject = 
       {
-      _id: '5a422aa71b54a676234d17f8',
-      title: 'Go To Statement Considered Harmful',
-      author: 'Edsger W. Dijkstra',
-      url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
-      likes: 5,
-      __v: 0
-    }
-    expect(result).toEqual(resultBlog)
+        author: "Edsger W. Dijkstra",
+        blogs: 1
+      }
+    expect(result).toEqual(resultObject)
   })
 
-  test('when list has many blogs returns the one with most likes', () => {
-    const result = listHelper.favouriteBlog(blogs)
-    const resultBlog = 
+ test('when list has many blogs returns the most favourite author', () => {
+    const result = listHelper.mostBlogs(blogs)
+    const resultObject = 
       {
-        _id: "5a422b3a1b54a676234d17f9",
-        title: "Canonical string reduction",
-        author: "Edsger W. Dijkstra",
-        url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-        likes: 12,
-        __v: 0
+        author: "Robert C. Martin",
+        blogs: 3
       }
-    expect(result).toEqual(resultBlog)
+    expect(result).toEqual(resultObject)
   })
 
   test('when list is empty return empty object', () => {
-    const result = listHelper.favouriteBlog([])
+    const result = listHelper.mostBlogs([])
     expect(result).toEqual({})
   })
 })

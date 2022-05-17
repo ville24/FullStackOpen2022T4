@@ -9,12 +9,11 @@ const totalLikes = (blogs) => {
 }
 
 const favouriteBlog = (blogs) => {
-  return blogs.reduce((favouriteBlog, blog) => {
-    if (favouriteBlog.likes > blog.likes)
-      return favouriteBlog
-  else
-      return blog
-  }, {})
+  return blogs.reduce((favouriteBlog, blog) => 
+    favouriteBlog.likes > blog.likes
+    ? favouriteBlog
+    : blog
+  , {})
 }
 
 

@@ -1,7 +1,6 @@
-const logger = require('./logger')
-const _ = require('lodash');
+const _ = require('lodash')
 
-const dummy = (blogs) => {
+const dummy = () => {
   return(1)
 }
 
@@ -10,33 +9,33 @@ const totalLikes = (blogs) => {
 }
 
 const favouriteBlog = (blogs) => {
-  return blogs.reduce((favouriteBlog, blog) => 
+  return blogs.reduce((favouriteBlog, blog) =>
     favouriteBlog.likes > blog.likes
-    ? favouriteBlog
-    : blog
+      ? favouriteBlog
+      : blog
   , {})
 }
 
 const mostBlogs = blogs => {
   const authors = []
-  _.forEach(_.countBy(blogs, (blog) => blog.author), (value, key) => {authors.push( {'author':key,'blogs':value})})
+  _.forEach(_.countBy(blogs, (blog) => blog.author), (value, key) => {authors.push( { 'author':key, 'blogs':value } ) })
   return authors.length === 0
-  ? {}
-  : _.maxBy(authors, 'blogs') 
+    ? {}
+    : _.maxBy(authors, 'blogs')
 }
 
 const mostLikes = blogs => {
   const authors = []
   _.forEach(_.groupBy(blogs, (blog) => blog.author), (value, key) => {
     const likes = value.reduce((sum, value) => sum + value.likes, 0)
-    authors.push( {'author':key,'likes':likes})
+    authors.push( { 'author':key, 'likes':likes } )
   })
 
   return authors.length === 0
-  ? {}
-  : _.maxBy(authors, 'likes') 
-} 
+    ? {}
+    : _.maxBy(authors, 'likes')
+}
 
 module.exports = {
   dummy, totalLikes, favouriteBlog, mostBlogs, mostLikes
-} 
+}

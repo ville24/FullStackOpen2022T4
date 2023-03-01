@@ -88,8 +88,7 @@ test('a valid blog can be added', async () => {
     title: 'Canonical string reduction - part 2',
     author: 'Edsger W. Dijkstra',
     url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
-    likes: 11,
-    __v: 0
+    likes: 11
   }
 
   await api
@@ -106,6 +105,27 @@ test('a valid blog can be added', async () => {
   expect(titles).toContain(
     'Canonical string reduction - part 2'
   )
+})
+
+test('likes are set to 0', async () => {
+  const newBlog = {
+    title: 'Canonical string reduction - part 3',
+    author: 'Edsger W. Dijkstra',
+    url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html'
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+
+  const likes = response.body.map(r => r.likes)
+
+  expect(response.body).toHaveLength(initialBlogs.length + 1)
+  likes.forEach(like => expect(like).toBeDefined())
 })
 
 afterAll(async () => {

@@ -128,6 +128,17 @@ test('likes are set to 0', async () => {
   likes.forEach(like => expect(like).toBeDefined())
 })
 
+test('check title and url', async () => {
+  const newBlog = {
+    author: 'Edsger W. Dijkstra'
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+})
+
 afterAll(async () => {
   await mongoose.connection.close()
 })

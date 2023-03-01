@@ -139,6 +139,44 @@ test('check title and url', async () => {
     .expect(400)
 })
 
+test('delete blog', async () => {
+  await api
+    .delete('/api/blogs/5a422bc61b54a676234d17fc')
+    .expect(204)
+
+  const response = await api.get('/api/blogs')
+
+  const ids = response.body.map(r => r.id)
+
+  expect(response.body).toHaveLength(initialBlogs.length - 1)
+  expect(ids).not.toContain('5a422bc61b54a676234d17fc')
+})
+
+test('modify blog', async () => {
+  const blog = {
+    id: '5a422bc61b54a676234d17fc',
+    title: 'Type wars',
+    author: 'Robert C. Martin',
+    url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
+    likes: 3,
+  }
+
+  await api
+    .put('/api/blogs/5a422bc61b54a676234d17fc')
+    .send(blog)
+    .expect(201)
+
+  const response = await api.get('/api/blogs')
+
+  const modifiedBlog = response.body.filter(blog => blog.id === '5a422bc61b54a676234d17fc')
+
+  expect(modifiedBlog[0].likes).toBe(3)
+})
+
+
+
+
+
 afterAll(async () => {
   await mongoose.connection.close()
 })

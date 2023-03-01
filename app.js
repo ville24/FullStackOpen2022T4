@@ -7,9 +7,11 @@ const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
 
-logger.info('connecting to', config.MONGODB_URI)
+const MONGODB_URI = process.env.NODE_ENV === 'test' ? process.env.TEST_MONGODB_URI : process.env.MONGODB_URI
 
-mongoose.connect(config.MONGODB_URI, { pass:config.PASSWORD, useNewUrlParser: true, useUnifiedTopology: true })
+logger.info('connecting to', MONGODB_URI)
+
+mongoose.connect(MONGODB_URI, { pass:config.PASSWORD, useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     logger.info('connected to MongoDB')
   })
@@ -28,3 +30,4 @@ app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 
 module.exports = app
+

@@ -63,7 +63,7 @@ beforeEach( async () => {
   }
 })
 
-test('notes are returned as json', async () => {
+test('blogs are returned as json', async () => {
   await api
     .get('/api/blogs')
     .expect(200)
@@ -81,6 +81,31 @@ test('check id field', async () => {
   response.body.forEach(blog => {
     expect(blog.id).toBeDefined()
   })
+})
+
+test('a valid blog can be added', async () => {
+  const newBlog = {
+    title: 'Canonical string reduction - part 2',
+    author: 'Edsger W. Dijkstra',
+    url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
+    likes: 11,
+    __v: 0
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+
+  const titles = response.body.map(r => r.title)
+
+  expect(response.body).toHaveLength(initialBlogs.length + 1)
+  expect(titles).toContain(
+    'Canonical string reduction - part 2'
+  )
 })
 
 afterAll(async () => {

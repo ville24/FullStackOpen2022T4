@@ -12,7 +12,7 @@ const MONGODB_URI = process.env.NODE_ENV === 'test' ? process.env.TEST_MONGODB_U
 
 logger.info('connecting to', MONGODB_URI)
 
-mongoose.connect(MONGODB_URI, { pass:config.PASSWORD, useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(MONGODB_URI, { pass:config.PASSWORD, useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
   .then(() => {
     logger.info('connected to MongoDB')
   })

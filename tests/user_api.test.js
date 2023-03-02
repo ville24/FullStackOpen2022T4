@@ -58,3 +58,88 @@ describe('when there is initially one user at db', () => {
     expect(usernames).toContain(newUser.username)
   })
 })
+
+describe('test username and password validity', () => {
+  test('creation fails if username is missing', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      name: 'Teppo Testaaja',
+      password: 'salasana'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+
+    expect(result.body.error).toContain('Path `username` is required')
+  })
+
+  test('creation fails if password is missing', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'ttestaaj',
+      name: 'Teppo Testaaja',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+
+    expect(result.body.error).toContain('Path `passwordHash` is required')
+  })
+
+  test('creation fails if username is too short', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'tt',
+      name: 'Teppo Testaaja',
+      password: 'salasana'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+
+    expect(result.body.error).toContain('User validation failed: username: Path `username` (`tt`) is shorter than the minimum allowed length (3).')
+  })
+
+  test('creation fails if password is too short', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'ttestaaj',
+      name: 'Teppo Testaaja',
+      password: 'pw'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+
+    expect(result.body.error).toContain('Path `password` is shorter than the minimum allowed length (3).')
+
+  })
+})

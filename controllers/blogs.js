@@ -14,12 +14,8 @@ blogsRouter.post('/', async (request, response, next) => {
   const body = request.body
 
   try {
-    const decodedToken = jwt.verify(request.token, config.SECRET)
-    if (!decodedToken.id) {
-      return response.status(401).json({ error: 'token invalid' })
-    }
 
-    const user = await User.findById(decodedToken.id)
+    const user = request.user
 
     if (!body.title || !body.url)
       next({
@@ -51,14 +47,11 @@ blogsRouter.post('/', async (request, response, next) => {
 
 blogsRouter.delete('/:id', async (request, response, next) => {
   try {
-    const decodedToken = jwt.verify(request.token, config.SECRET)
-    if (!decodedToken.id) {
-      return response.status(401).json({ error: 'token invalid' })
-    }
+    const user = request.user
 
     const blog = await Blog.findById(request.params.id)
 
-    if (decodedToken.id.toString() === blog.user.toString()) {
+    if (user.id.toString() === blog.user.toString()) {
       await Blog.findByIdAndRemove(request.params.id, { useFindAndModify: false })
       response.status(204).end()
     }
@@ -74,13 +67,18 @@ blogsRouter.delete('/:id', async (request, response, next) => {
   }
 })
 
-blogsRouter.put('/:id', async (request, response) => {
-  const blog = new Blog(request.body)
-  blog._id = request.params.id
+blogsRouter.put('/:id', async (request, response, next) => {
+  try {
+    const blog = new Blog(request.body)
+    blog._id = request.params.id
 
-  await Blog
-    .findByIdAndUpdate( request.params.id, blog, { new: true, overwrite: true, useFindAndModify: false } )
-  response.status(201).json(response.result)
+    await Blog
+      .findByIdAndUpdate( request.params.id, blog, { new: true, overwrite: true, useFindAndModify: false } )
+    response.status(201).json(response.result)
+  }
+  catch (exception) {
+    next(exception)
+  }
 })
 
 module.exports = blogsRouter

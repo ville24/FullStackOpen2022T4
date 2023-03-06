@@ -24,7 +24,7 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).json({ error: error.message })
   }
   else if (error.name ===  'JsonWebTokenError') {
-    return response.status(400).json({ error: 'token missing or invalid' })
+    return response.status(401).json({ error: 'token missing or invalid' })
   }
   else if (error.name === 'TokenExpiredError') {
     return response.status(401).json({ error: 'token expired' })
@@ -36,21 +36,30 @@ const errorHandler = (error, request, response, next) => {
 }
 
 const tokenExtractor = (request, response, next) => {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.startsWith('Bearer ')) {
-    request.token = authorization.replace('Bearer ', '')
+  try {
+    const authorization = request.get('authorization')
+    if (authorization && authorization.startsWith('Bearer ')) {
+      request.token = authorization.replace('Bearer ', '')
+    }
+  }
+  catch (exception) {
+    next(exception)
   }
   next()
 }
 
 const userExtractor =  async (request, response, next) => {
-  const decodedToken = jwt.verify(request.token, config.SECRET)
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
+  try  {
+    const decodedToken = jwt.verify(request.token, config.SECRET)
+    if (!decodedToken.id) {
+      return response.status(401).json({ error: 'token invalid' })
+    }
+
+    request.user = await User.findById(decodedToken.id)
   }
-
-  request.user = await User.findById(decodedToken.id)
-
+  catch (exception) {
+    next(exception)
+  }
   next()
 }
 

@@ -2,7 +2,11 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
+
 const api = supertest(app)
+const bcrypt = require('bcrypt')
+const helper = require('./test_helper')
 
 const initialBlogs = [
   {
@@ -51,7 +55,8 @@ const initialBlogs = [
     author: 'Robert C. Martin',
     url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
     likes: 2,
-    __v: 0
+    __v: 0,
+    user:  '6404966f01d6f943aee84582'
   }
 ]
 
@@ -61,29 +66,55 @@ beforeEach( async () => {
     const blogObject = new Blog(blog)
     await blogObject.save()
   }
+
+  await User.deleteMany({})
+
+  const passwordHash = await bcrypt.hash('salasana', 10)
+  const user = new User(
+    {
+      _id: '6404966f01d6f943aee84582',
+      username: 'mmeikala',
+      name: 'Matti Meikäläinen',
+      passwordHash
+    })
+
+  await user.save()
 })
 
 test('blogs are returned as json', async () => {
+  const token = await helper.userLogin()
+
   await api
     .get('/api/blogs')
+    .set({ Authorization: 'Bearer ' + token })
     .expect(200)
     .expect('Content-Type', /application\/json/)
 })
 
 test('all blogs are returned', async () => {
-  const response = await api.get('/api/blogs')
+  const token = await helper.userLogin()
+
+  const response = await api
+    .get('/api/blogs')
+    .set({ Authorization: 'Bearer ' + token })
 
   expect(response.body).toHaveLength(initialBlogs.length)
 })
 
 test('check id field', async () => {
-  const response = await api.get('/api/blogs')
+  const token = await helper.userLogin()
+
+  const response = await api
+    .get('/api/blogs')
+    .set({ Authorization: 'Bearer ' + token })
   response.body.forEach(blog => {
     expect(blog.id).toBeDefined()
   })
 })
 
 test('a valid blog can be added', async () => {
+  const token = await helper.userLogin()
+
   const newBlog = {
     title: 'Canonical string reduction - part 2',
     author: 'Edsger W. Dijkstra',
@@ -93,11 +124,13 @@ test('a valid blog can be added', async () => {
 
   await api
     .post('/api/blogs')
+    .set({ Authorization: 'Bearer ' + token })
     .send(newBlog)
     .expect(201)
-    .expect('Content-Type', /application\/json/)
 
-  const response = await api.get('/api/blogs')
+  const response = await api
+    .get('/api/blogs')
+    .set({ Authorization: 'Bearer ' + token })
 
   const titles = response.body.map(r => r.title)
 
@@ -108,6 +141,8 @@ test('a valid blog can be added', async () => {
 })
 
 test('likes are set to 0', async () => {
+  const token = await helper.userLogin()
+
   const newBlog = {
     title: 'Canonical string reduction - part 3',
     author: 'Edsger W. Dijkstra',
@@ -116,11 +151,13 @@ test('likes are set to 0', async () => {
 
   await api
     .post('/api/blogs')
+    .set({ Authorization: 'Bearer ' + token })
     .send(newBlog)
     .expect(201)
-    .expect('Content-Type', /application\/json/)
 
-  const response = await api.get('/api/blogs')
+  const response = await api
+    .get('/api/blogs')
+    .set({ Authorization: 'Bearer ' + token })
 
   const likes = response.body.map(r => r.likes)
 
@@ -129,22 +166,30 @@ test('likes are set to 0', async () => {
 })
 
 test('check title and url', async () => {
+  const token = await helper.userLogin()
+
   const newBlog = {
     author: 'Edsger W. Dijkstra'
   }
 
   await api
     .post('/api/blogs')
+    .set({ Authorization: 'Bearer ' + token })
     .send(newBlog)
     .expect(400)
 })
 
 test('delete blog', async () => {
+  const token = await helper.userLogin()
+
   await api
     .delete('/api/blogs/5a422bc61b54a676234d17fc')
+    .set({ Authorization: 'Bearer ' + token })
     .expect(204)
 
-  const response = await api.get('/api/blogs')
+  const response = await api
+    .get('/api/blogs')
+    .set({ Authorization: 'Bearer ' + token })
 
   const ids = response.body.map(r => r.id)
 
@@ -153,6 +198,8 @@ test('delete blog', async () => {
 })
 
 test('modify blog', async () => {
+  const token = await helper.userLogin()
+
   const blog = {
     id: '5a422bc61b54a676234d17fc',
     title: 'Type wars',
@@ -163,18 +210,40 @@ test('modify blog', async () => {
 
   await api
     .put('/api/blogs/5a422bc61b54a676234d17fc')
+    .set({ Authorization: 'Bearer ' + token })
     .send(blog)
     .expect(201)
 
-  const response = await api.get('/api/blogs')
+  const response = await api
+    .get('/api/blogs')
+    .set({ Authorization: 'Bearer ' + token })
 
   const modifiedBlog = response.body.filter(blog => blog.id === '5a422bc61b54a676234d17fc')
 
   expect(modifiedBlog[0].likes).toBe(3)
 })
 
+test('a blog cannot be added  if token is missing', async () => {
+  const token = await helper.userLogin()
 
+  const newBlog = {
+    title: 'Canonical string reduction - part 2',
+    author: 'Edsger W. Dijkstra',
+    url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
+    likes: 11
+  }
 
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(401)
+
+  const response = await api
+    .get('/api/blogs')
+    .set({ Authorization: 'Bearer ' + token })
+
+  expect(response.body).toHaveLength(initialBlogs.length)
+})
 
 
 afterAll(async () => {

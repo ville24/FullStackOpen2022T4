@@ -7,7 +7,8 @@
     "start": "NODE_ENV=production node index.js",
     "dev": "NODE_ENV=development nodemon index.js",
     "lint": "eslint .",
-    "test": "jest --verbose --runInBand"
+    "test": "jest --verbose --runInBand",
+    "start:test": "NODE_ENV=test node index.js"
   },
   "repository": {
     "type": "git",
@@ -31,7 +32,6 @@
     "supertest": "^6.3.3"
   },
   "jest": {
-    "testEnvironment": "node",
-    "globalTeardown": "./tests/teardown.js"
+    "testEnvironment": "node"
   }
 }
